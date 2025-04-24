@@ -64,7 +64,9 @@ tfstate/ → Stores Terraform state files (best to use remote storage in product
 
 
 
->>
+
+>
+> 
 terraform {
   required_providers {
     azurerm = {
@@ -77,5 +79,6 @@ terraform {
 provider "azurerm" {
   features {}
 }
->>
+
+>
 
