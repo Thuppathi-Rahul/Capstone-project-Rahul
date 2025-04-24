@@ -55,3 +55,27 @@ tfstate/ → Stores Terraform state files (best to use remote storage in product
 > outputs.tf → Stores output values that Terraform exposes after deployment.
 > 
 > providers.tf → Specifies which cloud provider (Azure, AWS, etc.) and authentication settings to use.
+
+
+**Step 3: Terraform Code**
+
+
+**providers.tf**
+
+
+
+>>
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"  # Ensures Terraform uses version 4.x
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}
+}
+>>
+
