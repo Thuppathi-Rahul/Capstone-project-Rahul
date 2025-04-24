@@ -44,6 +44,7 @@ cd main
 touch main.tf variables.tf outputs.tf providers.tf
 
 **What Each File Does**
+
 main.tf → Your core Terraform configurations (resources, modules, etc.).
 
 variables.tf → Defines input variables for your Terraform setup.
