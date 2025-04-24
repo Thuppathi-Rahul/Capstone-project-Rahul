@@ -11,7 +11,7 @@
 **Region:** Central India
 
 **Resource Groups:**
-rg-dev-network-01 (for network resources),rg-dev-application-01 (for application resources)
+rg-dev-network-01 (for network resources),  rg-dev-application-01 (for application resources)
 
-**Subnet Planning**
+**Subnet Planning:**
 snet-dev-web, snet-dev-app, snet-dev-data, snet-dev-pep
