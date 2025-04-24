@@ -42,16 +42,16 @@ tfstate/ → Stores Terraform state files (best to use remote storage in product
  
 **Inside the main/ directory, create the following files:**
 
-cd main
-
-touch main.tf variables.tf outputs.tf providers.tf
+> cd main
+>
+> touch main.tf variables.tf outputs.tf providers.tf
 
 **What Each File Does**
 
-main.tf → Your core Terraform configurations (resources, modules, etc.).
-
-variables.tf → Defines input variables for your Terraform setup.
-
-outputs.tf → Stores output values that Terraform exposes after deployment.
-
-providers.tf → Specifies which cloud provider (Azure, AWS, etc.) and authentication settings to use.
+> main.tf → Your core Terraform configurations (resources, modules, etc.).
+> 
+> variables.tf → Defines input variables for your Terraform setup.
+> 
+> outputs.tf → Stores output values that Terraform exposes after deployment.
+> 
+> providers.tf → Specifies which cloud provider (Azure, AWS, etc.) and authentication settings to use.
