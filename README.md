@@ -66,7 +66,7 @@ tfstate/ → Stores Terraform state files (best to use remote storage in product
 
 
 >
-> 
+
 terraform {
   required_providers {
     azurerm = {
@@ -82,3 +82,79 @@ provider "azurerm" {
 
 >
 
+
+
+**main.tf** 
+
+
+
+>
+
+resource "azurerm_resource_group" "network" {
+  name     = "rg-dev-network-01"
+  location = "Central India"
+}
+
+resource "azurerm_virtual_network" "vnet" {
+  name                = "vnet-dev-01"
+  address_space       = ["10.1.0.0/20"]
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource "azurerm_subnet" "web" {
+  name                 = "snet-dev-web"
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.1.0.0/22"]
+}
+
+resource "azurerm_network_security_group" "web_nsg" {
+  name                = "nsg-snet-dev-web"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource "azurerm_subnet" "app" {
+  name                 = "snet-dev-app"
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.1.4.0/22"]
+}
+
+resource "azurerm_network_security_group" "app_nsg" {
+  name                = "nsg-snet-dev-app"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+
+resource "azurerm_subnet" "data" {
+  name                 = "snet-dev-data"
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.1.8.0/22"]
+}
+
+resource "azurerm_network_security_group" "data_nsg" {
+  name                = "nsg-snet-dev-data"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+
+resource "azurerm_subnet" "pep" {
+  name                 = "snet-dev-pep"
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.1.12.0/22"]
+}
+
+resource "azurerm_network_security_group" "pep_nsg" {
+  name                = "nsg-snet-dev-pep"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+
+>
