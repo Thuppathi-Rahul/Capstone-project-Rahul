@@ -88,8 +88,8 @@ provider "azurerm" {
 
 
 
->
-///
+
+/
 resource "azurerm_resource_group" "network" {
   name     = "rg-dev-network-01"
   location = "Central India"
@@ -156,5 +156,4 @@ resource "azurerm_network_security_group" "pep_nsg" {
   resource_group_name = azurerm_resource_group.network.name
 }
 
-///
->
+/
