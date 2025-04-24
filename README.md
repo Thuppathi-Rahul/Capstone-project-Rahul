@@ -21,11 +21,13 @@ snet-dev-web, snet-dev-app, snet-dev-data, snet-dev-pep
 **Step 2: Terraform Setup (Local or Repo)**
 
 **1️⃣ Create Directory Structure**
-Run the following commands in your terminal to set up the directories:
+
+**Run the following commands in your terminal to set up the directories:**
 
 > mkdir azure-project && cd azure-project
+>
 > mkdir modules main tfstate
-> 
+ 
 **This creates:**
 
 azure-project/ → Your root directory.
@@ -37,6 +39,7 @@ main/ → Contains your primary Terraform configuration files.
 tfstate/ → Stores Terraform state files (best to use remote storage in production).
 
  **2️⃣ Create Main Terraform Files**
+ 
 **Inside the main/ directory, create the following files:**
 
 cd main
