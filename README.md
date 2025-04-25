@@ -129,7 +129,6 @@ resource "azurerm_network_security_group" "app_nsg" {
   resource_group_name = azurerm_resource_group.network.name
 }
 
-
 resource "azurerm_subnet" "data" {
   name                 = "snet-dev-data"
   resource_group_name  = azurerm_resource_group.network.name
@@ -156,5 +155,61 @@ resource "azurerm_network_security_group" "pep_nsg" {
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
 }
+
+
+resource "azurerm_public_ip" "vm_ip" {
+  name                = "pip-dev-vm"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+  allocation_method   = "Dynamic"
+  sku                 = "Basic"
+}
+
+resource "azurerm_network_interface" "dev_vm_nic" {
+  name                = "nic-dev-vm"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.web.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm_ip.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "dev_vm" {
+  name                            = "dev-vm"
+  location                        = azurerm_resource_group.network.location
+  resource_group_name             = azurerm_resource_group.network.name
+  network_interface_ids           = [azurerm_network_interface.dev_vm_nic.id]
+  size                            = "Standard_B1s"
+  admin_username                  = "azureuser"
+  disable_password_authentication = true
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("~/.ssh/id_rsa.pub")  # Point to your public key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    name                 = "dev-os-disk"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+
+  custom_data = filebase64("docker-install.sh")
+}
+
+
+
+
 
 ```
