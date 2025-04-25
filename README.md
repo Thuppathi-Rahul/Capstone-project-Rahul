@@ -7,17 +7,17 @@
 ```
 
 **Step 1: Set Up Azure Resources Planning**
- ```
+ 
 **Region:** Central India
 
 **Resource Groups:**
 rg-dev-network-01 (for network resources),  rg-dev-application-01 (for application resources)
- ```
+
 **Subnet Planning:**
- ```
+
 snet-dev-web, snet-dev-app, snet-dev-data, snet-dev-pep
 
- ```
+
 
 **Step 2: Terraform Setup (Local or Repo)**
 
