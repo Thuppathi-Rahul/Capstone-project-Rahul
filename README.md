@@ -59,7 +59,7 @@ outputs.tf → Stores output values that Terraform exposes after deployment.
 
  ```
 **Step 3: Terraform Code**
-
+<!-- Create a providers.tf file provide which platform you are using  like Azure or Aws or Gcp in the providers file such that terraform will call the api of that platforms -->
 
 **providers.tf**
 
@@ -68,7 +68,8 @@ outputs.tf → Stores output values that Terraform exposes after deployment.
 
 
 ```
-# **Create a providers.tf file provide which platform you are using  like Azure or Aws or Gcp in the providers file such that terraform will call the api of that platforms **
+
+
 terraform {
   required_providers {
     azurerm = {
