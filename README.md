@@ -60,7 +60,7 @@ outputs.tf → Stores output values that Terraform exposes after deployment.
  ```
 **Step 3: Terraform Code**
 
-
+# **Create a providers.tf file Provide which platform you are using  like Azure or Aws or Gcp in the providers file such that terraform will call the api of that platforms **
 **providers.tf**
 
 
@@ -205,7 +205,7 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
     version   = "latest"
   }
 
-  custom_data = filebase64("docker-install.sh")
+  custom_data = filebase64("docker-install.sh")     # Create a docker_install.sh file in same folder(docker_install.sh is they in github files)
 }
 
 
