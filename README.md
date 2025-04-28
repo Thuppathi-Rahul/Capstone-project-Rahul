@@ -212,7 +212,8 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")  # Point to your public key
+    public_key = file("~/.ssh/id_rsa.pub")  # public key(If you don't public key download by using this command ssh-keygen -t rsa -b 4096)
+ 
   }
 
   os_disk {
