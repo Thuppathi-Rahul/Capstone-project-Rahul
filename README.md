@@ -178,13 +178,25 @@ resource "azurerm_network_security_rule" "allow_ssh_from_my_ip" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "*"
+  source_address_prefix       = "13.71.3.96" #your ip address
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.network.name
   network_security_group_name = azurerm_network_security_group.web_nsg.name
 }
 
-
+resource "azurerm_network_security_rule" "deny_other_ssh" {
+  name                        = "Deny-Other-SSH"
+  priority                    = 200
+  direction                   = "Inbound"
+  access                      = "Deny"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.network.name
+  network_security_group_name = azurerm_network_security_group.web_nsg.name
+}
 resource "azurerm_network_security_group" "data_nsg" {
   name                = "${var.prefix}-nsg-snet-dev-data"
   location            = azurerm_resource_group.network.location
@@ -302,7 +314,48 @@ resource "azurerm_linux_web_app" "webapp" {
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
   }
+  public_network_access_enabled = false
 }
+
+
+# Private DNS Zone for Web App
+resource "azurerm_private_dns_zone" "webapp_dns" {
+  name                = "privatelink.azurewebsites.net"
+  resource_group_name = azurerm_resource_group.network.name
+}
+# Link Private DNS Zone to VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "webapp_dns_link" {
+  name                  = "${var.prefix}-webapp-dns-link"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = azurerm_private_dns_zone.webapp_dns.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
+}
+# Private Endpoint for Web App
+resource "azurerm_private_endpoint" "webapp_pe" {
+  name                = "${var.prefix}-pe-webapp"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
+  subnet_id           = azurerm_subnet.pep.id
+
+  private_service_connection {
+    name                           = "${var.prefix}-psc-webapp"
+    private_connection_resource_id = azurerm_linux_web_app.webapp.id
+    is_manual_connection           = false
+    subresource_names              = ["sites"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.webapp_dns.id]
+  }
+}
+
+
+
+
+
+
+
 # from GitHub we are pulling the repo and runnning the web app
 
 resource "azurerm_app_service_source_control" "scm" {
@@ -311,6 +364,22 @@ resource "azurerm_app_service_source_control" "scm" {
   branch    = "main"
 }
 
+# Output the private endpoint FQDN for web app access
+output "webapp_private_fqdn" {
+  value = "${azurerm_linux_web_app.webapp.name}.azurewebsites.net"
+}
+
+output "webapp_private_endpoint_ip" {
+  value = azurerm_private_endpoint.webapp_pe.private_service_connection[0].private_ip_address
+}
+
+output "vm_public_ip" {
+  value = azurerm_public_ip.vm_ip.ip_address
+}
+
+output "ssh_command" {
+  value = "ssh azureuser@${azurerm_public_ip.vm_ip.ip_address}"
+}
 
 
 ```
