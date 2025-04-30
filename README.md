@@ -120,7 +120,6 @@ resource "azurerm_resource_group" "application" {
 }
 
 
-
 # Virtual Network
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.prefix}-vnet-dev"
@@ -171,6 +170,20 @@ resource "azurerm_network_security_group" "app_nsg" {
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
 }
+resource "azurerm_network_security_rule" "allow_ssh_from_my_ip" {
+  name                        = "Allow-SSH-From-My-IP"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.network.name
+  network_security_group_name = azurerm_network_security_group.web_nsg.name
+}
+
 
 resource "azurerm_network_security_group" "data_nsg" {
   name                = "${var.prefix}-nsg-snet-dev-data"
@@ -182,6 +195,29 @@ resource "azurerm_network_security_group" "pep_nsg" {
   name                = "${var.prefix}-nsg-snet-dev-pep"
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
+}
+
+
+
+# Associate NSGs with subnets
+resource "azurerm_subnet_network_security_group_association" "web" {
+  subnet_id                 = azurerm_subnet.web.id
+  network_security_group_id = azurerm_network_security_group.web_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "app" {
+  subnet_id                 = azurerm_subnet.app.id
+  network_security_group_id = azurerm_network_security_group.app_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "data" {
+  subnet_id                 = azurerm_subnet.data.id
+  network_security_group_id = azurerm_network_security_group.data_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "pep" {
+  subnet_id                 = azurerm_subnet.pep.id
+  network_security_group_id = azurerm_network_security_group.pep_nsg.id
 }
 
 
@@ -239,9 +275,6 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
 
   custom_data = filebase64("docker-install.sh")
 }
-
-
-
 
 # App service plan
 
