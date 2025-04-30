@@ -8,7 +8,7 @@
 
 **Step 1: Set Up Azure Resources Planning**
  
-**Region:** Central India
+**Region:** Central Canada
 
 **Resource Groups:**
 rg-dev-network-01 (for network resources),  rg-dev-application-01 (for application resources)
