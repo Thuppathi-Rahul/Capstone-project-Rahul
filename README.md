@@ -70,18 +70,26 @@ outputs.tf → Stores output values that Terraform exposes after deployment.
 ```
 
 
+# Configure the Azure provider, you can have many
+# if you use azurerm provider, it's source is hashicorp/azurerm
+# short for registry.terraform.io/hashicorp/azurerm
+
+
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.20.0"
+      version = "~> 4.12.0"
     }
   }
-}
 
-# Configure the Microsoft Azure Provider
+  required_version = ">= 1.9.0"
+}
+# configures the provider
+
 provider "azurerm" {
   features {}
+  subscription_id = "000000000000000000000000000"
 }
 
 ```
@@ -94,104 +102,104 @@ provider "azurerm" {
 
 
 ```
-# To create resource_group
+# Variables
+variable "prefix" {
+  default = "Rahul"
+  type    = string
+}
 
+# Resource Group for Networking
 resource "azurerm_resource_group" "network" {
-  name     = "rg-dev-network-01"
-  location = "Central India"
+  name     = "${var.prefix}-rg-dev-network"
+  location = "canadacentral"
+}
+# Resource Group for Application
+resource "azurerm_resource_group" "application" {
+  name     = "${var.prefix}-rg-dev-application"
+  location = "canadacentral"
 }
 
 
-# To create virtual_network
 
+# Virtual Network
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-dev-01"
+  name                = "${var.prefix}-vnet-dev"
   address_space       = ["10.1.0.0/20"]
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
 }
 
-# To create snet-dev-web(Subnet for web)
-
+# Subnets
 resource "azurerm_subnet" "web" {
-  name                 = "snet-dev-web"
+  name                 = "${var.prefix}-snet-dev-web"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.1.0.0/22"]
 }
-# To create nsg-snet-dev-web(network_security_group for web)
-
-resource "azurerm_network_security_group" "web_nsg" {
-  name                = "nsg-snet-dev-web"
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
-}
-
-# To create snet-dev-app(Subnet for app)
 
 resource "azurerm_subnet" "app" {
-  name                 = "snet-dev-app"
+  name                 = "${var.prefix}-snet-dev-app"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.1.4.0/22"]
 }
 
-# To create nsg-snet-dev-app(network_security_group for app)
-
-resource "azurerm_network_security_group" "app_nsg" {
-  name                = "nsg-snet-dev-app"
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
-}
-
-# To create snet-dev-data(Subnet for data)
 resource "azurerm_subnet" "data" {
-  name                 = "snet-dev-data"
+  name                 = "${var.prefix}-snet-dev-data"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.1.8.0/22"]
 }
-# To create nsg-snet-dev-app(network_security_group for data)
-resource "azurerm_network_security_group" "data_nsg" {
-  name                = "nsg-snet-dev-data"
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
-}
 
-# To create snet-dev-pep(Subnet for pep)
 resource "azurerm_subnet" "pep" {
-  name                 = "snet-dev-pep"
+  name                 = "${var.prefix}-snet-dev-pep"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.1.12.0/22"]
 }
 
-# To create nsg-snet-dev-pep(network_security_group for pep)
+
+
+resource "azurerm_network_security_group" "web_nsg" {
+  name                = "${var.prefix}-nsg-snet-dev-web"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource "azurerm_network_security_group" "app_nsg" {
+  name                = "${var.prefix}-nsg-snet-dev-app"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
+resource "azurerm_network_security_group" "data_nsg" {
+  name                = "${var.prefix}-nsg-snet-dev-data"
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+}
+
 resource "azurerm_network_security_group" "pep_nsg" {
-  name                = "nsg-snet-dev-pep"
+  name                = "${var.prefix}-nsg-snet-dev-pep"
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
 }
 
 
-# To create virtual machine in web subnet
 
-<!-- Every Azure Virtual Machine MUST be connected to a Network Interface Card (NIC).The NIC is the resource that actually attaches
-     the VM to a subnet inside a Virtual Network (VNet).The subnet itself is like a network "area," but NIC is what carries the IP address,
-     handles communication, security groups, etc. -->
-
+# Public IP for VM
 resource "azurerm_public_ip" "vm_ip" {
-  name                = "pip-dev-vm"
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
-  allocation_method   = "Dynamic"
+  name                = "${var.prefix}-pip-dev-vm"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
+  allocation_method   = "Static"
   sku                 = "Basic"
 }
 
+# NIC for VM
 resource "azurerm_network_interface" "dev_vm_nic" {
-  name                = "nic-dev-vm"
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
+  name                = "${var.prefix}-nic-dev-vm"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
 
   ip_configuration {
     name                          = "internal"
@@ -201,19 +209,19 @@ resource "azurerm_network_interface" "dev_vm_nic" {
   }
 }
 
+# VM
 resource "azurerm_linux_virtual_machine" "dev_vm" {
-  name                            = "dev-vm"
-  location                        = azurerm_resource_group.network.location
-  resource_group_name             = azurerm_resource_group.network.name
-  network_interface_ids           = [azurerm_network_interface.dev_vm_nic.id]
-  size                            = "Standard_B1s"
-  admin_username                  = "azureuser"
+  name                  = "${var.prefix}-dev-vm"
+  location              = azurerm_resource_group.application.location
+  resource_group_name   = azurerm_resource_group.application.name
+  network_interface_ids = [azurerm_network_interface.dev_vm_nic.id]
+  size                  = "Standard_B1s"
+  admin_username        = "azureuser"
   disable_password_authentication = true
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")  # public key(If you don't public key download by using this command ssh-keygen -t rsa -b 4096)
- 
+    public_key = file("~/.ssh/id_rsa.pub")
   }
 
   os_disk {
@@ -222,9 +230,6 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
     name                 = "dev-os-disk"
   }
 
-
-# After creating Virtual in Web subnet we are going to install the docker by using docker_install.sh file
-
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
@@ -232,10 +237,46 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
     version   = "latest"
   }
 
-  custom_data = filebase64("docker-install.sh")     # Create a docker_install.sh file in same folder(docker_install.sh is they in github files)
+  custom_data = filebase64("docker-install.sh")
 }
 
 
+
+
+# App service plan
+
+resource "azurerm_service_plan" "asp" {
+  name                = "${var.prefix}-asp"
+  resource_group_name = azurerm_resource_group.application.name
+  location            =  azurerm_resource_group.application.location
+  os_type             = "Linux"
+  sku_name            = "S1"
+}
+
+# Web app
+resource "azurerm_linux_web_app" "webapp" {
+  name                = "${var.prefix}-webapp"
+  resource_group_name = azurerm_resource_group.application.name
+  location            = azurerm_service_plan.asp.location
+  service_plan_id     = azurerm_service_plan.asp.id
+
+  site_config {
+    application_stack {
+      dotnet_version = "8.0" #Using dotnet for deploying web application
+    }
+  }
+
+  app_settings = {
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+  }
+}
+# from GitHub we are pulling the repo and runnning the web app
+
+resource "azurerm_app_service_source_control" "scm" {
+  app_id    = azurerm_linux_web_app.webapp.id
+  repo_url  = "https://github.com/Thuppathi-Rahul/Rahul-capstone-webapp"  
+  branch    = "main"
+}
 
 
 
