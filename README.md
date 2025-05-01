@@ -298,6 +298,10 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "S1"
 }
 
+
+
+
+
 # Web app
 resource "azurerm_linux_web_app" "webapp" {
   name                = "${var.prefix}-webapp"
@@ -313,9 +317,18 @@ resource "azurerm_linux_web_app" "webapp" {
 
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    # Application Insights Integration
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.webapp_insights.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.webapp_insights.connection_string
+    "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"  # Auto-instrumentation
+    "XDT_MicrosoftApplicationInsights_Mode" = "recommended"
+    # For .NET Core apps
+    "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES" = "Microsoft.ApplicationInsights.StartupBootstrapper"
   }
   public_network_access_enabled = false
 }
+
+
 
 
 # Private DNS Zone for Web App
@@ -379,6 +392,25 @@ output "vm_public_ip" {
 
 output "ssh_command" {
   value = "ssh azureuser@${azurerm_public_ip.vm_ip.ip_address}"
+}
+
+#Create Log Analytics Workspace ---> Required for both Application Insights and VM monitoring
+resource "azurerm_log_analytics_workspace" "monitoring" {
+  name                = "${var.prefix}-law"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
+  sku                 = "PerGB2018"  # Free tier eligible
+  retention_in_days   = 30
+}
+
+#Add Application Insights ---> For web app monitoring
+
+resource "azurerm_application_insights" "webapp_insights" {
+  name                = "${var.prefix}-appinsights"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
+  application_type    = "web"  # For web applications
+  workspace_id        = azurerm_log_analytics_workspace.monitoring.id  # Add this if you have LA
 }
 
 
