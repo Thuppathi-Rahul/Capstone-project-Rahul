@@ -266,7 +266,9 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
   size                  = "Standard_B1s"
   admin_username        = "azureuser"
   disable_password_authentication = true
-
+   identity {
+    type = "SystemAssigned"
+   }
   admin_ssh_key {
     username   = "azureuser"
     public_key = file("~/.ssh/id_rsa.pub")
@@ -284,8 +286,8 @@ resource "azurerm_linux_virtual_machine" "dev_vm" {
     sku       = "22_04-lts"
     version   = "latest"
   }
-
-  custom_data = filebase64("docker-install.sh")
+  
+  custom_data = fileexists("docker-install.sh") ? filebase64("docker-install.sh") : null
 }
 
 # App service plan
@@ -298,7 +300,15 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "S1"
 }
 
+#Add Application Insights ---> For web app monitoring
 
+resource "azurerm_application_insights" "webapp_insights" {
+  name                = "${var.prefix}-appinsights"
+  location            = azurerm_resource_group.application.location
+  resource_group_name = azurerm_resource_group.application.name
+  application_type    = "web"  # For web applications
+  workspace_id        = azurerm_log_analytics_workspace.monitoring.id  # Add this if you have LA
+}
 
 
 
@@ -403,15 +413,129 @@ resource "azurerm_log_analytics_workspace" "monitoring" {
   retention_in_days   = 30
 }
 
-#Add Application Insights ---> For web app monitoring
 
-resource "azurerm_application_insights" "webapp_insights" {
-  name                = "${var.prefix}-appinsights"
-  location            = azurerm_resource_group.application.location
-  resource_group_name = azurerm_resource_group.application.name
-  application_type    = "web"  # For web applications
-  workspace_id        = azurerm_log_analytics_workspace.monitoring.id  # Add this if you have LA
+
+#Configure Diagnostic Settings ---> For all  resources
+
+
+# 1. WEB APP DIAGNOSTICS ---> HTTP logs + metrics
+resource "azurerm_monitor_diagnostic_setting" "webapp_diag" {
+  name                       = "webapp-diag"
+  target_resource_id         = azurerm_linux_web_app.webapp.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.monitoring.id
+
+  enabled_log {
+    category = "AppServiceHTTPLogs"
+  }
+  
+  metric {
+    category = "AllMetrics"
+  }
 }
 
 
+
+
+# 2. VM DIAGNOSTICS ---> Metrics only (for basic VM monitoring)
+resource "azurerm_monitor_diagnostic_setting" "vm_diag" {
+  name                       = "vm-diag"
+  target_resource_id         = azurerm_linux_virtual_machine.dev_vm.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.monitoring.id
+
+  metric {
+    category = "AllMetrics"
+  }
+}
+
+# Storage account for boot diagnostics
+resource "azurerm_storage_account" "boot_diag" {
+  name = replace("${lower(var.prefix)}-dev-boot-diag", "-", "") 
+  resource_group_name      = azurerm_resource_group.application.name
+  location                = azurerm_resource_group.application.location
+  account_tier            = "Standard"
+  account_replication_type = "LRS"
+}
+
+# Extension for Log Analytics agent to collect syslog and other logs
+resource "azurerm_virtual_machine_extension" "log_analytics" {
+  name                       = "OMSExtension"
+  virtual_machine_id         = azurerm_linux_virtual_machine.dev_vm.id
+  publisher                  = "Microsoft.EnterpriseCloud.Monitoring"
+  type                       = "OmsAgentForLinux"
+  type_handler_version       = "1.13"
+  auto_upgrade_minor_version = true
+
+  settings = jsonencode({
+    "workspaceId" = azurerm_log_analytics_workspace.monitoring.workspace_id
+  })
+
+  protected_settings = jsonencode({
+    "workspaceKey" = azurerm_log_analytics_workspace.monitoring.primary_shared_key
+  })
+}
+
+# 3. NETWORK SECURITY GROUP DIAGNOSTICS ---> Flow logs + rule counters
+resource "azurerm_monitor_diagnostic_setting" "nsg_diag" {
+  for_each = toset([
+    azurerm_network_security_group.web_nsg.id,
+    azurerm_network_security_group.app_nsg.id,
+    azurerm_network_security_group.data_nsg.id
+  ])
+
+  name = "nsg-diag-${basename(each.key)}"
+
+  target_resource_id         = each.value
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.monitoring.id
+
+  enabled_log {
+    category = "NetworkSecurityGroupEvent"
+  }
+
+  enabled_log {
+    category = "NetworkSecurityGroupRuleCounter"
+  }
+}
+
+# 4. PUBLIC IP DIAGNOSTICS ---> Metrics
+resource "azurerm_monitor_diagnostic_setting" "public_ip_diag" {
+  name                       = "pip-diag"
+  target_resource_id         = azurerm_public_ip.vm_ip.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.monitoring.id
+
+  metric {
+    category = "AllMetrics"
+  }
+}
+
+# Email action group
+resource "azurerm_monitor_action_group" "email_alert" {
+  name                = "${var.prefix}-email-alerts"
+  resource_group_name = azurerm_resource_group.application.name
+  short_name          = "emailalert"
+
+  email_receiver {
+    name          = "admin-email"
+    email_address = "youremail@gmail.com" # Replace with your email
+  }
+}
+
+# VM shutdown alert
+resource "azurerm_monitor_metric_alert" "vm_shutdown" {
+  name                = "${var.prefix}-vm-shutdown-alert"
+  resource_group_name = azurerm_resource_group.application.name
+  scopes             = [azurerm_linux_virtual_machine.dev_vm.id]
+  description        = "Alert when VM is stopped"
+
+  criteria {
+    metric_namespace = "Microsoft.Compute/virtualMachines"
+    metric_name      = "Percentage CPU"
+    aggregation      = "Average"
+    operator         = "LessThan"
+    threshold        = 1  # Triggers when CPU <1% for 5 minutes
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.email_alert.id
+  }
+}
 ```
