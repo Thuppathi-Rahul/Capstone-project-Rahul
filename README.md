@@ -1,8 +1,9 @@
-> **Azure Web Application & VM Deployment Project**
+**Azure Web Application & VM Deployment Project**
 
-**Project Overview**
+ **Project Overview**
+> 
 This project automates the deployment of a secure web application and virtual machine (VM) on Microsoft Azure using Infrastructure as Code (Terraform). The architecture includes private networking, monitoring with Azure Monitor, and deployment via Azure DevOps pipelines.
-
+> 
 Key features:
 
 Private connectivity for PaaS services using Private Endpoints
