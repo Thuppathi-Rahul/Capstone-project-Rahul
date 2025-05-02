@@ -30,7 +30,7 @@ Architecture Diagram
 
 **Core Resources Deployed**
 
-**1.Networking**
+**Networking**
 ```
 -- Virtual Network with multiple subnets (web, app, data, private endpoints)
 
