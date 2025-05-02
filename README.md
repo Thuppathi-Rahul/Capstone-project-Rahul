@@ -209,15 +209,22 @@ Test alert by stopping VM
 
 --> Verify NSG rules are properly restricting access
 ```
+
+**KQL Query for Log Analysis**
+
 ```
-KQL Query for Log Analysis
 kql
 // KQL query to view logs for last 24 hours
 AzureActivity
 | where TimeGenerated > ago(24h)
 | project TimeGenerated, OperationName, Caller, ResourceGroup, Resource
 | order by TimeGenerated desc
-Outputs
+
+```
+
+**Outputs**
+
+```
 After successful deployment, the following outputs are available:
 
 Web App Private FQDN: [webapp-name].azurewebsites.net
@@ -228,7 +235,10 @@ VM Public IP: [public-ip]
 
 SSH Command: ssh azureuser@[public-ip]
 
-Cost Considerations
+```
+
+**Cost Considerations**
+```
 The implementation uses free-tier eligible SKUs where possible:
 
 VM: Standard_B1s (burstable)
@@ -236,49 +246,51 @@ VM: Standard_B1s (burstable)
 App Service Plan: S1 (shared)
 
 Log Analytics: PerGB2018 pricing tier
-
-Maintenance & Next Steps
-Production Recommendations:
-
+```
+**Maintenance & Next Steps
+1.Production Recommendations:**
+```
 Use remote state storage (Azure Storage)
 
 Implement Terraform workspaces for environments
 
 Add more granular monitoring and alerting
-
-Scaling Options:
-
+```
+**Scaling Options:**
+```
 Upgrade VM and App Service SKUs
 
 Implement auto-scaling rules
 
 Add additional monitoring solutions
-
-Security Enhancements:
-
+```
+**Security Enhancements:**
+```
 Implement Azure Policy for compliance
 
 Add network watcher for advanced monitoring
 
 Configure Azure Security Center
-
-Troubleshooting
-Common issues and solutions:
-
-SSH Access Problems
-
+```
+**Troubleshooting**
+**Common issues and solutions:**
+```
+1.SSH Access Problems
+> 
 Verify your public IP matches the allowed IP in NSG rules
 
 Check VM boot diagnostics for startup issues
-
-Web App Connectivity
-
+> 
+2. Web App Connectivity
+> 
 Validate private endpoint connection status
 
 Check DNS resolution in the VNet
-
-Alert Notifications
-
+> 
+3. Alert Notifications
+> 
 Verify email address in action group
 
 Check alert rule criteria matches expected conditions
+> 
+```
