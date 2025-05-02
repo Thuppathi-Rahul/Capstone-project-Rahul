@@ -3,55 +3,65 @@
  **Project Overview**
 > 
 This project automates the deployment of a secure web application and virtual machine (VM) on Microsoft Azure using Infrastructure as Code (Terraform). The architecture includes private networking, monitoring with Azure Monitor, and deployment via Azure DevOps pipelines.
-> 
-Key features:
+>
 
-Private connectivity for PaaS services using Private Endpoints
+**Key features:**
+```
 
-Secure VM access restricted to specific IP addresses
+-- Private connectivity for PaaS services using Private Endpoints
 
-Comprehensive monitoring with Application Insights and Log Analytics
+-- Secure VM access restricted to specific IP addresses
 
-Alerting for critical events like VM shutdown
+-- Comprehensive monitoring with Application Insights and Log Analytics
 
-Resource locks to prevent accidental deletion
+-- Alerting for critical events like VM shutdown
 
-Architecture Components
-Architecture Diagram (Placeholder for actual diagram)
+-- Resource locks to prevent accidental deletion
+```
 
-Core Resources Deployed
-Networking
 
-Virtual Network with multiple subnets (web, app, data, private endpoints)
+**Architecture Components**
+Architecture Diagram
+```
+![Uploading image.png…]()
 
-Network Security Groups with restrictive rules
+```
 
-Private DNS Zones for private endpoint resolution
+**Core Resources Deployed**
 
-Compute
+**1.Networking**
+```
+-- Virtual Network with multiple subnets (web, app, data, private endpoints)
 
-Ubuntu 22.04 LTS Virtual Machine
+-- Network Security Groups with restrictive rules
 
-App Service Plan and Linux Web App
+-- Private DNS Zones for private endpoint resolution
 
-Monitoring & Management
+```
+**Compute**
+```
+-- Ubuntu 22.04 LTS Virtual Machine
 
-Log Analytics Workspace
+-- App Service Plan and Linux Web App
+```
+**Monitoring & Management**
+```
+-- Log Analytics Workspace
 
-Application Insights
+-- Application Insights
 
-Diagnostic Settings for all resources
+-- Diagnostic Settings for all resources
 
-Alert rules with email notifications
+-- Alert rules with email notifications
+```
+**Security**
+```
+-- Resource locks
 
-Security
+-- NSG rules restricting access
 
-Resource locks
-
-NSG rules restricting access
-
-Private endpoints for secure connectivity
-
+-- Private endpoints for secure connectivity
+```
 Implementation Steps
 1. Infrastructure Planning
 Region: Central India
