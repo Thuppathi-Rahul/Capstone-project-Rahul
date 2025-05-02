@@ -515,7 +515,7 @@ resource "azurerm_monitor_action_group" "email_alert" {
 
   email_receiver {
     name          = "admin-email"
-    email_address = "youremail@gmail.com" # Replace with your email
+    email_address = "rahulthuppathi@gmail.com" # Replace with your email
   }
 }
 
@@ -537,5 +537,49 @@ resource "azurerm_monitor_metric_alert" "vm_shutdown" {
   action {
     action_group_id = azurerm_monitor_action_group.email_alert.id
   }
+}
+# Resource Locks to prevent accidental deletion
+resource "azurerm_management_lock" "vm_lock" {
+  name       = "${var.prefix}-vm-lock"
+  scope      = azurerm_linux_virtual_machine.dev_vm.id
+  lock_level = "CanNotDelete"
+  notes      = "This VM should not be deleted"
+}
+
+resource "azurerm_management_lock" "webapp_lock" {
+  name       = "${var.prefix}-webapp-lock"
+  scope      = azurerm_linux_web_app.webapp.id
+  lock_level = "CanNotDelete"
+  notes      = "This web app should not be deleted"
+}
+
+resource "azurerm_management_lock" "rg_network_lock" {
+  name       = "${var.prefix}-network-rg-lock"
+  scope      = azurerm_resource_group.network.id
+  lock_level = "CanNotDelete"
+  notes      = "This resource group should not be deleted"
+}
+
+resource "azurerm_management_lock" "rg_app_lock" {
+  name       = "${var.prefix}-app-rg-lock"
+  scope      = azurerm_resource_group.application.id
+  lock_level = "CanNotDelete"
+  notes      = "This resource group should not be deleted"
+}
+
+# ... (all your resource definitions above) ...
+
+# Output the KQL query for viewing logs
+output "kql_query" {
+  value = <<EOT
+// KQL query to view logs for last 24 hours
+AzureActivity
+| where TimeGenerated > ago(24h)
+| project TimeGenerated, OperationName, Caller, ResourceGroup, Resource
+| order by TimeGenerated desc
+EOT
+}
+
+
 }
 ```
