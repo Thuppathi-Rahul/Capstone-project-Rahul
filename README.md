@@ -63,24 +63,33 @@ Architecture Diagram
 
 -- Private endpoints for secure connectivity
 ```
-Implementation Steps
-1. Infrastructure Planning
-Region: Central India
-Resource Groups:
+**Implementation Steps**
 
-rg-dev-network-01 - For network-related resources
+**1. Infrastructure Planning**
+> 
+**Region:** Central India
+**Resource Groups:**
+```
+ --> rg-dev-network-01 - For network-related resources
+ --> rg-dev-application-01 - For application resources
 
-rg-dev-application-01 - For application resources
+```
 
-Subnet Structure:
 
-Subnet Name	Address Range	Purpose
-snet-dev-web	10.1.0.0/22	Web-facing services
-snet-dev-app	10.1.4.0/22	Application services
-snet-dev-data	10.1.8.0/22	Database services
-snet-dev-pep	10.1.12.0/22	Private Endpoints
-2. Terraform Setup
-Directory Structure:
+**Subnet Structure:**
+```
+**Subnet Name**	,**Address Range**,	**Purpose**
+snet-dev-web,	    10.1.0.0/22	,   Web-facing services
+snet-dev-app,    	10.1.4.0/22	,   Application services
+snet-dev-data,   	10.1.8.0/22,  	Database services
+snet-dev-pep,   	10.1.12.0/22, 	Private Endpoints
+
+```
+
+
+**2. Terraform Setup**
+
+**Directory Structure:**
 
 azure-project/
 ├── modules/       # Reusable Terraform modules
@@ -90,46 +99,53 @@ azure-project/
 │   ├── outputs.tf
 │   └── providers.tf
 └── tfstate/       # For state files (local - use remote in production)
-3. Key Terraform Configurations
-Network Security:
 
-SSH access restricted to a single IP address
 
-Deny all other SSH attempts
 
-Separate NSGs for each subnet
+**3. Key Terraform Configurations**
+**Network Security:**
+```
+--> SSH access restricted to a single IP address
 
-Private Connectivity:
+--> Deny all other SSH attempts
 
-Private DNS Zone (privatelink.azurewebsites.net)
+--> Separate NSGs for each subnet
 
-Private Endpoint for Web App
+```
+**Private Connectivity:**
+```
+--> Private DNS Zone (privatelink.azurewebsites.net)
 
-VNet integration for DNS resolution
+--> Private Endpoint for Web App
 
-Monitoring:
+--> VNet integration for DNS resolution
+```
+**Monitoring:**
+```
+--> Application Insights integrated with Web App
 
-Application Insights integrated with Web App
+--> Log Analytics workspace collecting:
 
-Log Analytics workspace collecting:
+    1. Web App HTTP logs
 
-Web App HTTP logs
+    2. VM metrics
 
-VM metrics
+    3. NSG flow logs
 
-NSG flow logs
+--> Diagnostic settings for all resources
+```
 
-Diagnostic settings for all resources
+**Alerting:**
+```
+--> Email alert when VM CPU drops below 1% (indicating shutdown)
 
-Alerting:
+--> Action group configured with admin email
+```
 
-Email alert when VM CPU drops below 1% (indicating shutdown)
+**4. Azure DevOps Pipeline**
+**Pipeline Components:**
 
-Action group configured with admin email
-
-4. Azure DevOps Pipeline
-Pipeline Components:
-
+```
 Terraform Installation - Installs required Terraform version
 
 Initialization - terraform init
@@ -140,8 +156,10 @@ Planning - terraform plan
 
 Application - terraform apply
 
-Pipeline YAML Highlights:
+```
 
+**Pipeline YAML Highlights:**
+```
 yaml
 steps:
 - task: TerraformInstaller@0
@@ -158,33 +176,39 @@ steps:
   
 - task: TerraformCLI@0
   displayName: 'Terraform apply'
-5. Verification Steps
-Resource Validation
 
+```
+
+**5. Verification Steps**
+```
+**Resource Validation**  
+```
 Confirm all resources are provisioned in correct resource groups
 
 Verify subnet assignments and NSG associations
-
-Connectivity Tests
-
+```
+**Connectivity Tests**
+```
 SSH to VM (only from allowed IP)
 
 Verify web app accessibility through private endpoint
+```
 
-Monitoring Verification
-
+**Monitoring Verification**
+```
 Check Application Insights for web app data
 
 Validate diagnostic settings for all resources
 
 Test alert by stopping VM
-
-Security Checks
-
+```
+**Security Checks**
+```
 Confirm resource locks are in place
 
 Verify NSG rules are properly restricting access
-
+```
+```
 KQL Query for Log Analysis
 kql
 // KQL query to view logs for last 24 hours
