@@ -79,7 +79,7 @@ Architecture Diagram
 **Subnet Structure:**
 ```
 **Subnet Name**	,**Address Range**,	**Purpose**
-snet-dev-web,	   10.1.0.0/22	,   Web-facing services
+snet-dev-web,	  10.1.0.0/22	,   Web-facing services
 snet-dev-app,    10.1.4.0/22	,   Application services
 snet-dev-data,   10.1.8.0/22,  	Database services
 snet-dev-pep,   	10.1.12.0/22, 	Private Endpoints
@@ -181,33 +181,33 @@ steps:
 ```
 
 **5. Verification Steps**
-```
+
 **Resource Validation**  
 ```
-Confirm all resources are provisioned in correct resource groups
+--> Confirm all resources are provisioned in correct resource groups
 
-Verify subnet assignments and NSG associations
+--> Verify subnet assignments and NSG associations
 ```
 **Connectivity Tests**
 ```
-SSH to VM (only from allowed IP)
+--> SSH to VM (only from allowed IP)
 
-Verify web app accessibility through private endpoint
+--> Verify web app accessibility through private endpoint
 ```
 
 **Monitoring Verification**
 ```
-Check Application Insights for web app data
+--> Check Application Insights for web app data
 
-Validate diagnostic settings for all resources
+--> Validate diagnostic settings for all resources
 
 Test alert by stopping VM
 ```
 **Security Checks**
 ```
-Confirm resource locks are in place
+--> Confirm resource locks are in place
 
-Verify NSG rules are properly restricting access
+--> Verify NSG rules are properly restricting access
 ```
 ```
 KQL Query for Log Analysis
