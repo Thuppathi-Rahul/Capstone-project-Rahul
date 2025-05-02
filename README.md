@@ -276,21 +276,18 @@ Configure Azure Security Center
 **Common issues and solutions:**
 ```
 1.SSH Access Problems
-> 
+
 Verify your public IP matches the allowed IP in NSG rules
-
 Check VM boot diagnostics for startup issues
-> 
+
 2. Web App Connectivity
-> 
+ 
 Validate private endpoint connection status
-
 Check DNS resolution in the VNet
-> 
-3. Alert Notifications
-> 
-Verify email address in action group
 
+3. Alert Notifications
+ 
+Verify email address in action group
 Check alert rule criteria matches expected conditions
-> 
+
 ```
