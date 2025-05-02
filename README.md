@@ -79,9 +79,9 @@ Architecture Diagram
 **Subnet Structure:**
 ```
 **Subnet Name**	,**Address Range**,	**Purpose**
-snet-dev-web,	    10.1.0.0/22	,   Web-facing services
-snet-dev-app,    	10.1.4.0/22	,   Application services
-snet-dev-data,   	10.1.8.0/22,  	Database services
+snet-dev-web,	   10.1.0.0/22	,   Web-facing services
+snet-dev-app,    10.1.4.0/22	,   Application services
+snet-dev-data,   10.1.8.0/22,  	Database services
 snet-dev-pep,   	10.1.12.0/22, 	Private Endpoints
 
 ```
@@ -91,6 +91,7 @@ snet-dev-pep,   	10.1.12.0/22, 	Private Endpoints
 
 **Directory Structure:**
 
+```
 azure-project/
 ├── modules/       # Reusable Terraform modules
 ├── main/          # Primary configuration files
@@ -99,7 +100,7 @@ azure-project/
 │   ├── outputs.tf
 │   └── providers.tf
 └── tfstate/       # For state files (local - use remote in production)
-
+```
 
 
 **3. Key Terraform Configurations**
