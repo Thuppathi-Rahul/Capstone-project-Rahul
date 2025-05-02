@@ -81,8 +81,8 @@ Architecture Diagram
 **Subnet Name**	,**Address Range**,	**Purpose**
 snet-dev-web,	  10.1.0.0/22	,   Web-facing services
 snet-dev-app,    10.1.4.0/22	,   Application services
-snet-dev-data,   10.1.8.0/22,  	Database services
-snet-dev-pep,   	10.1.12.0/22, 	Private Endpoints
+snet-dev-data,   10.1.8.0/22,   	Database services
+snet-dev-pep,   10.1.12.0/22, 	 Private Endpoints
 
 ```
 
