@@ -23,7 +23,8 @@ This project automates the deployment of a secure web application and virtual ma
 **Architecture Components**
 Architecture Diagram
 ```
-![Uploading image.png…]()
+![Screenshot 2025-04-23 153645](https://github.com/user-attachments/assets/6d51fedd-7607-4f43-8c29-a9c7aa70e85d)
+
 
 ```
 
